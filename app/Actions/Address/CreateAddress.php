@@ -2,10 +2,10 @@
 
 namespace App\Actions\Address;
 
-use App\Exceptions\CreateAddressException;
-use App\Http\Requests\AddressCreateRequest;
 use App\Models\Address;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Response;
+use App\Http\Resources\AddressResource;
+use Facades\App\Supports\Message;
 
 class CreateAddress 
 {
@@ -19,24 +19,11 @@ class CreateAddress
             ->first();
 
         if ($existsAddress) {
-            throw new CreateAddressException('Esse endereço já existe no sistema');
+            return response(Message::error('Esse endereço já existe no sistema'), Response::HTTP_BAD_REQUEST);
         }
 
-        $address = Address::query()->create($data); 
-        return $this->formatDataReturn($address);
-    }
+        $address = Address::create($data);
 
-    private function formatDataReturn(object $address)
-    {   
-        return [
-            'id' => $address->id,
-            'logradouro' => $address->logradouro,
-            'numero'     => $address->numero,
-            'bairro'     => $address->bairro,
-            'cidade'     => [
-                'id'   => $address->cidade->id,
-                'nome' => $address->cidade->nome,
-            ]
-        ];
+        return AddressResource::make($address);
     }
 }

@@ -4,20 +4,23 @@ namespace App\Actions\Address;
 
 use App\Models\Address;
 use Illuminate\Http\Response;
-use App\Exceptions\UpdateAddressException;
+use Facades\App\Supports\Message;
+use App\Http\Resources\AddressResource;
 
 class UpdateAddress 
 {
     public function execute(array $data, $address_id)
     {   
-        $address = Address::find($address_id);
-        
-        if (!$address) {
-            throw new UpdateAddressException('Esse ID do endereço não é foi encontrado no sistema');
+        if (!$address = Address::find($address_id)) {
+            return response(
+                Message::error('Esse ID do endereço não é foi encontrado no sistema'),Response::HTTP_BAD_REQUEST
+            );
         }
 
         if ($this->existsOtherAddress($data, $address)) {
-            throw new UpdateAddressException('Esse endereço já existe no sistema');
+            return response(
+                Message::error('Esse endereço já existe no sistema'), Response::HTTP_BAD_REQUEST
+            );
         }
 
         $address->logradouro = $data['logradouro'] ?? $address->logradouro;
@@ -26,7 +29,7 @@ class UpdateAddress
         $address->cidade_id  = $data['cidade_id']  ?? $address->cidade_id;
         $address->save();
 
-        return $this->formatDataReturn($address);
+        return AddressResource::make($address);
     }
 
     private function existsOtherAddress($data, Address $address): bool
@@ -45,19 +48,5 @@ class UpdateAddress
             ->first();
 
         return $data ? true : false;
-    }
-
-    private function formatDataReturn(object $address)
-    {   
-        return [
-            'id' => $address->id,
-            'logradouro' => $address->logradouro,
-            'numero'     => $address->numero,
-            'bairro'     => $address->bairro,
-            'cidade'     => [
-                'id'   => $address->cidade->id,
-                'nome' => $address->cidade->nome,
-            ]
-        ];
     }
 }

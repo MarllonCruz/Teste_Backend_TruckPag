@@ -24,7 +24,7 @@ class UpdateTest extends TestCase
 
         $response = $this->json('post', route('address.update', ['id' => $address->id]), $payload);
 
-        $response->assertStatus(Response::HTTP_CREATED);
+        $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonFragment([
             "id"         =>  $address->id,
             'logradouro' => 'Rua logradoura editado',

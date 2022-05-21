@@ -2,59 +2,34 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Actions\Address\AllAddress;
-use Illuminate\Http\Request;
+use App\Models\Address;
 use App\Http\Controllers\Controller;
-use App\Actions\Address\CreateAddress;
-use App\Actions\Address\UpdateAddress;
-use App\Exceptions\CreateAddressException;
-use App\Exceptions\UpdateAddressException;
+use App\Http\Resources\AddressResource;
 use App\Http\Requests\AddressCreateRequest;
 use App\Http\Requests\AddressUpdateRequest;
-use App\Models\Address;
-use Illuminate\Http\Response;
+use Facades\App\Actions\Address\CreateAddress;
+use Facades\App\Actions\Address\DestroyAddress;
+use Facades\App\Actions\Address\UpdateAddress;
 
 class AddressController extends Controller
 {
-    public function all(AllAddress $action)
+    public function all()
     {   
-        $addresses = $action->execute();
-        return response()->json($addresses, Response::HTTP_OK);
+        return AddressResource::collection(Address::paginate());
     }
 
-
-    public function store(AddressCreateRequest $request, CreateAddress $action)
+    public function store(AddressCreateRequest $request)
     {   
-        try {
-            $response = $action->execute($request->validated());
-            return response()->json($response, Response::HTTP_CREATED);
-
-        } catch (CreateAddressException $exception) {
-            return response()->json(['errors' => ['main' => $exception->getMessage()]], Response::HTTP_BAD_REQUEST);
-        }
+        return CreateAddress::execute($request->validated());
     }
 
-    public function update(int $address_id, AddressUpdateRequest $request, UpdateAddress $action)
+    public function update(int $address_id, AddressUpdateRequest $request)
     {
-        try {
-            $response = $action->execute($request->validated(), $address_id);
-            return response()->json($response, Response::HTTP_CREATED);
-
-        } catch (UpdateAddressException $exception) {
-            return response()->json(['errors' => ['main' => $exception->getMessage()]], Response::HTTP_BAD_REQUEST);
-        }
+        return UpdateAddress::execute($request->validated(), $address_id);
     }
 
-    public function destroy(int $address_id)
+    public function destroy(int $id_address)
     {
-        $address = Address::find($address_id);
-        if (!$address) {
-            return response()->json([
-                    'errors' => ['main' => 'ID do endereço não foi encotrado no sistema']
-                ], Response::HTTP_BAD_REQUEST);
-        }
-
-        $address->delete();
-        return response()->json(['success' => 'Endereço removido com sucesso'], Response::HTTP_OK);
+        return DestroyAddress::execute($id_address);
     }
 }

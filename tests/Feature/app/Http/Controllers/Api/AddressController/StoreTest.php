@@ -26,16 +26,16 @@ class StoreTest extends TestCase
 
         $response = $this->json('post', route('address.store'), $payload);
 
-        $response->assertStatus(Response::HTTP_CREATED)
-            ->assertJsonFragment([
-                'logradouro' => 'Rua de tal',
-                'numero'     => '333',
-                'bairro'     => 'Bairro de tal',
-                'cidade'     => [
-                    'id'   => $city->id,
-                    'nome' => $city->nome
-                ] 
-            ]);
+        $response->assertStatus(Response::HTTP_CREATED);
+        $response->assertJsonFragment([
+            'logradouro' => 'Rua de tal',
+            'numero'     => '333',
+            'bairro'     => 'Bairro de tal',
+            'cidade'     => [
+                'id'   => $city->id,
+                'nome' => $city->nome
+            ] 
+        ]);
 
         $this->assertDatabaseHas('addresses', [
             'logradouro' => 'Rua de tal',

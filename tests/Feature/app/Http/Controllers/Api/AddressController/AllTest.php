@@ -13,31 +13,24 @@ class AllTest extends TestCase
     use RefreshDatabase;
     
     /** @test */
-    public function should_return_all_addresses_in_this_structure()
+    public function should_return_a_list_of_address_by_paginate_15()
     {   
         $city = City::factory()->create();
 
-        Address::factory([
-            'cidade_id' => $city->id
-        ])->create();
-        Address::factory([
-            'cidade_id' => $city->id
-        ])->create();
-        Address::factory([
+        Address::factory(16, [
             'cidade_id' => $city->id
         ])->create();
         
         $response = $this->json('get', route('address.all'));
 
         $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonCount(15, 'data');
         $response->assertJsonStructure([
-            '*' => [
-                'id',
-                'logradouro',
-                'numero',
-                'bairro',
-                'cidade'
-            ]
+            'data' => [
+                ['id', 'logradouro', 'numero', 'bairro', 'cidade']
+            ],
+            'links',
+            'meta'
         ]);
     }
 

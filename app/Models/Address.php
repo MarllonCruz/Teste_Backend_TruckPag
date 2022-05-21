@@ -12,8 +12,6 @@ class Address extends Model
 
     protected $fillable = ['logradouro', 'numero', 'bairro', 'cidade_id'];
 
-    protected $hidden = ['created_at', 'updated_at'];
-
     public function cidade()
     {
         return $this->belongsTo(City::class);

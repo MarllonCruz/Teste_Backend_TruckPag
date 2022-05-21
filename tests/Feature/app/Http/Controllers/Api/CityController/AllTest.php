@@ -12,17 +12,16 @@ class AllTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function should_return_all_cities_in_this_structure()
+    public function should_return_a_list_all_of_cities()
     {   
-        City::factory(2)->create();
+        City::factory(10)->create();
 
         $response = $this->json('get', route('city.all'));
 
         $response->assertStatus(Response::HTTP_OK);
         $response->assertJsonStructure([
-            '*' => [
-                'id',
-                'nome'
+            'data' => [
+                ['id', 'nome']
             ]
         ]);
     }
@@ -35,11 +34,10 @@ class AllTest extends TestCase
 
         $response = $this->json('get', route('city.all'));
 
-        $response
-            ->assertJsonFragment([
-                'nome' => $city1->nome,
-                'nome' => $city2->nome
-            ]);
+        $response->assertJsonFragment([
+            'nome' => $city1->nome,
+            'nome' => $city2->nome
+        ]);
     }
 
     /** @test */
